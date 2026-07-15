@@ -339,7 +339,7 @@
             animation: playPulse 2.5s ease-in-out infinite 1.25s;
         }
 
-        /* Close button (visible in fullscreen) */
+        /* Close button (só aparece em tela cheia no desktop) */
         .video-close-btn {
             display: none;
             position: absolute;
@@ -368,7 +368,7 @@
             transform: scale(1.1);
         }
 
-        /* Fullscreen styles */
+        /* Fullscreen styles — só aplicam no desktop */
         .hero-video-wrap:fullscreen,
         .hero-video-wrap:-webkit-full-screen {
             width: 100vw !important;
@@ -505,24 +505,21 @@
             Aprenda a oferecer serviços de design para empresas na Europa — trabalhando de qualquer lugar do mundo, no seu tempo, com recebimento em moeda forte.
         </p>
 
-        <!-- VÍDEO YOUTUBE SHORT COM FULLSCREEN -->
+        <!-- VÍDEO -->
         <div class="anim d4 flex justify-center mb-10">
             <div class="hero-video-wrap" id="video-container">
                 <div id="yt-player"></div>
 
-                <!-- Botão de play customizado -->
                 <button id="video-play-btn" class="video-play-btn" onclick="playVideo()">
                     <div class="play-icon-circle">
                         <iconify-icon icon="solar:play-bold" width="28" style="margin-left:3px"></iconify-icon>
                     </div>
                 </button>
 
-                <!-- Botão de fechar (só aparece em tela cheia) -->
                 <button id="video-close-btn" class="video-close-btn" onclick="closeVideo()">
                     <iconify-icon icon="solar:close-circle-bold" width="32"></iconify-icon>
                 </button>
 
-                <!-- Label -->
                 <div class="hero-video-label" id="video-label">
                     <iconify-icon icon="solar:play-bold" style="color:#38BDF8" width="10"></iconify-icon>
                     <span>Assista</span>
@@ -859,6 +856,12 @@
     var player;
     var isFullscreen = false;
 
+    // Detecta se é mobile
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            || (window.innerWidth <= 768 && 'ontouchstart' in window);
+    }
+
     function onYouTubeIframeAPIReady() {
         player = new YT.Player('yt-player', {
             videoId: '92kjE7RRDPU',
@@ -866,7 +869,7 @@
             height: '100%',
             playerVars: {
                 autoplay: 0,
-                mute: 1,
+                mute: 0,
                 controls: 0,
                 modestbranding: 1,
                 rel: 0,
@@ -886,22 +889,32 @@
     }
 
     function onPlayerReady(event) {
-        // Player carregado, pronto para interação
+        // Garante que comece desmutado
+        event.target.unMute();
+        event.target.setVolume(100);
     }
 
     function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.PLAYING) {
+        // Só vai fullscreen no DESKTOP quando começar a tocar
+        if (event.data == YT.PlayerState.PLAYING && !isMobile()) {
             requestVideoFullscreen();
         }
+        // Quando acabar, sai do fullscreen e reseta
         if (event.data == YT.PlayerState.ENDED) {
-            exitVideoFullscreen();
+            if (!isMobile()) {
+                exitVideoFullscreen();
+            }
+            resetVideo();
         }
     }
 
     function playVideo() {
         if (!player) return;
         document.getElementById('video-play-btn').style.display = 'none';
+        document.getElementById('video-label').style.display = 'none';
         player.seekTo(0);
+        player.unMute();
+        player.setVolume(100);
         player.playVideo();
     }
 
@@ -910,9 +923,18 @@
         player.pauseVideo();
         player.seekTo(0);
         exitVideoFullscreen();
+        resetVideo();
+    }
+
+    function resetVideo() {
+        setTimeout(function() {
+            document.getElementById('video-play-btn').style.display = 'flex';
+            document.getElementById('video-label').style.display = 'flex';
+        }, 300);
     }
 
     function requestVideoFullscreen() {
+        if (isMobile()) return; // Não faz nada no celular
         var container = document.getElementById('video-container');
         if (container.requestFullscreen) {
             container.requestFullscreen().catch(function(){});
@@ -933,13 +955,9 @@
         } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
         }
-        // Mostra o botão de play novamente depois de sair da tela cheia
-        setTimeout(function() {
-            document.getElementById('video-play-btn').style.display = 'flex';
-        }, 300);
     }
 
-    // Detecta quando sai da tela cheia (botão ESC, etc.)
+    // Detecta quando sai da tela cheia (ESC, etc.) — só no desktop
     function onFullscreenChange() {
         var fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
         if (!fsElement && isFullscreen) {
@@ -950,7 +968,7 @@
             if (player) {
                 player.seekTo(0);
             }
-            document.getElementById('video-play-btn').style.display = 'flex';
+            resetVideo();
         }
     }
 
