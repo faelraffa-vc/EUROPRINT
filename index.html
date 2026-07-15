@@ -92,6 +92,10 @@
             0%,100% { border-color: rgba(56,189,248,0.15); box-shadow: 0 0 20px rgba(56,189,248,0.05); }
             50% { border-color: rgba(139,92,246,0.25); box-shadow: 0 0 40px rgba(139,92,246,0.08), 0 0 80px rgba(56,189,248,0.04); }
         }
+        @keyframes playPulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0; }
+        }
 
         .anim { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; }
         .anim-scale { animation: fadeInScale 0.6s ease-out forwards; opacity: 0; }
@@ -238,7 +242,7 @@
             background-size: 200% 100%; animation: shimmer 4s linear infinite;
         }
 
-        /* Video container */
+        /* ===== VIDEO CONTAINER ===== */
         .hero-video-wrap {
             position: relative;
             width: 280px;
@@ -265,16 +269,149 @@
             position: absolute;
             inset: 0;
             border-radius: 24px;
-            background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.6) 100%);
+            background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%);
             pointer-events: none;
             z-index: 1;
         }
-        .hero-video-wrap iframe {
+        #yt-player {
             width: 100%;
             height: 100%;
-            display: block;
-            border: none;
+            position: relative;
+            z-index: 0;
         }
+        #yt-player iframe {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            border: none !important;
+        }
+
+        /* Play button overlay */
+        .video-play-btn {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.35);
+            cursor: pointer;
+            border: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s;
+        }
+        .video-play-btn:hover {
+            background: rgba(0,0,0,0.2);
+        }
+        .play-icon-circle {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: #fff;
+            transition: all 0.3s;
+        }
+        .video-play-btn:hover .play-icon-circle {
+            background: rgba(56,189,248,0.25);
+            border-color: rgba(56,189,248,0.4);
+            transform: scale(1.08);
+        }
+        .play-icon-circle::before,
+        .play-icon-circle::after {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.25);
+        }
+        .play-icon-circle::before {
+            animation: playPulse 2.5s ease-in-out infinite;
+        }
+        .play-icon-circle::after {
+            animation: playPulse 2.5s ease-in-out infinite 1.25s;
+        }
+
+        /* Close button (visible in fullscreen) */
+        .video-close-btn {
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 20;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+        .video-close-btn:hover {
+            background: rgba(239,68,68,0.4);
+            border-color: rgba(239,68,68,0.6);
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        /* Fullscreen styles */
+        .hero-video-wrap:fullscreen,
+        .hero-video-wrap:-webkit-full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            border-radius: 0 !important;
+            border: none !important;
+            background: #000 !important;
+            box-shadow: none !important;
+            animation: none !important;
+        }
+        .hero-video-wrap:fullscreen::before,
+        .hero-video-wrap:-webkit-full-screen::before {
+            display: none;
+        }
+        .hero-video-wrap:fullscreen::after,
+        .hero-video-wrap:-webkit-full-screen::after {
+            border-radius: 0;
+        }
+        .hero-video-wrap:fullscreen #yt-player,
+        .hero-video-wrap:-webkit-full-screen #yt-player {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .hero-video-wrap:fullscreen #yt-player iframe,
+        .hero-video-wrap:-webkit-full-screen #yt-player iframe {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .hero-video-wrap:fullscreen .video-close-btn,
+        .hero-video-wrap:-webkit-full-screen .video-close-btn {
+            display: flex !important;
+        }
+        .hero-video-wrap:fullscreen .hero-video-label,
+        .hero-video-wrap:-webkit-full-screen .hero-video-label {
+            display: none !important;
+        }
+        .hero-video-wrap:fullscreen .video-play-btn,
+        .hero-video-wrap:-webkit-full-screen .video-play-btn {
+            display: none !important;
+        }
+
         .hero-video-label {
             position: absolute;
             bottom: 16px;
@@ -291,7 +428,7 @@
             border-radius: 9999px;
             padding: 6px 14px;
             font-size: 10px;
-            font-mono;
+            font-family: 'Inter', monospace;
             text-transform: uppercase;
             letter-spacing: 0.15em;
             color: rgba(255,255,255,0.6);
@@ -303,6 +440,16 @@
                 width: 220px;
                 height: 391px;
                 border-radius: 20px;
+            }
+            .play-icon-circle {
+                width: 56px;
+                height: 56px;
+            }
+            .video-close-btn {
+                width: 42px;
+                height: 42px;
+                top: 16px;
+                right: 16px;
             }
         }
 
@@ -358,16 +505,25 @@
             Aprenda a oferecer serviços de design para empresas na Europa — trabalhando de qualquer lugar do mundo, no seu tempo, com recebimento em moeda forte.
         </p>
 
-        <!-- VÍDEO YOUTUBE SHORT -->
+        <!-- VÍDEO YOUTUBE SHORT COM FULLSCREEN -->
         <div class="anim d4 flex justify-center mb-10">
-            <div class="hero-video-wrap">
-                <iframe 
-                    src="https://www.youtube.com/embed/92kjE7RRDPU?rel=0&modestbranding=1&playsinline=1&loop=1&playlist=92kjE7RRDPU&mute=1&autoplay=1" 
-                    title="EuroPrint - Vídeo" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen
-                ></iframe>
-                <div class="hero-video-label">
+            <div class="hero-video-wrap" id="video-container">
+                <div id="yt-player"></div>
+
+                <!-- Botão de play customizado -->
+                <button id="video-play-btn" class="video-play-btn" onclick="playVideo()">
+                    <div class="play-icon-circle">
+                        <iconify-icon icon="solar:play-bold" width="28" style="margin-left:3px"></iconify-icon>
+                    </div>
+                </button>
+
+                <!-- Botão de fechar (só aparece em tela cheia) -->
+                <button id="video-close-btn" class="video-close-btn" onclick="closeVideo()">
+                    <iconify-icon icon="solar:close-circle-bold" width="32"></iconify-icon>
+                </button>
+
+                <!-- Label -->
+                <div class="hero-video-label" id="video-label">
                     <iconify-icon icon="solar:play-bold" style="color:#38BDF8" width="10"></iconify-icon>
                     <span>Assista</span>
                 </div>
@@ -693,6 +849,117 @@
     </div>
 </footer>
 
+<!-- YouTube IFrame API -->
+<script>
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player;
+    var isFullscreen = false;
+
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('yt-player', {
+            videoId: '92kjE7RRDPU',
+            width: '100%',
+            height: '100%',
+            playerVars: {
+                autoplay: 0,
+                mute: 1,
+                controls: 0,
+                modestbranding: 1,
+                rel: 0,
+                loop: 0,
+                fs: 0,
+                playsinline: 1,
+                showinfo: 0,
+                iv_load_policy: 3,
+                disablekb: 1,
+                cc_load_policy: 0
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        // Player carregado, pronto para interação
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PLAYING) {
+            requestVideoFullscreen();
+        }
+        if (event.data == YT.PlayerState.ENDED) {
+            exitVideoFullscreen();
+        }
+    }
+
+    function playVideo() {
+        if (!player) return;
+        document.getElementById('video-play-btn').style.display = 'none';
+        player.seekTo(0);
+        player.playVideo();
+    }
+
+    function closeVideo() {
+        if (!player) return;
+        player.pauseVideo();
+        player.seekTo(0);
+        exitVideoFullscreen();
+    }
+
+    function requestVideoFullscreen() {
+        var container = document.getElementById('video-container');
+        if (container.requestFullscreen) {
+            container.requestFullscreen().catch(function(){});
+        } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) {
+            container.msRequestFullscreen();
+        }
+        isFullscreen = true;
+    }
+
+    function exitVideoFullscreen() {
+        isFullscreen = false;
+        if (document.exitFullscreen) {
+            document.exitFullscreen().catch(function(){});
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+        // Mostra o botão de play novamente depois de sair da tela cheia
+        setTimeout(function() {
+            document.getElementById('video-play-btn').style.display = 'flex';
+        }, 300);
+    }
+
+    // Detecta quando sai da tela cheia (botão ESC, etc.)
+    function onFullscreenChange() {
+        var fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        if (!fsElement && isFullscreen) {
+            isFullscreen = false;
+            if (player && player.getPlayerState() === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            }
+            if (player) {
+                player.seekTo(0);
+            }
+            document.getElementById('video-play-btn').style.display = 'flex';
+        }
+    }
+
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('msfullscreenchange', onFullscreenChange);
+</script>
+
+<!-- Resto dos scripts -->
 <script>
     // Scroll reveal
     const srEls = document.querySelectorAll('.sr');
